@@ -1,6 +1,7 @@
 "use server";
 
 import { getApiUrl } from "@/utils/api";
+import { revalidatePath } from "next/cache";
 
 export type ApplicationFormState = {
   fieldErrors: Record<string, string[]>;
@@ -33,7 +34,10 @@ export const createApplicationAction = async (
       const fieldErrors = body.errors
         .filter((item: { field?: string }) => item?.field)
         .reduce(
-          (acc: Record<string, string[]>, item: { field: string; messages?: string[] }) => ({
+          (
+            acc: Record<string, string[]>,
+            item: { field: string; messages?: string[] },
+          ) => ({
             ...acc,
             [item.field]: item.messages ?? [],
           }),
@@ -47,6 +51,8 @@ export const createApplicationAction = async (
       installment: null,
     };
   }
+
+  revalidatePath("/applications/list");
   return {
     fieldErrors: {},
     globalError: null,
